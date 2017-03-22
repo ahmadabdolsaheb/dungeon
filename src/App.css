@@ -25,6 +25,22 @@ td
 }
 
 
-.wall{
-    background: #333;
+.wall{background: #333;
 }
+
+.player{background: white;
+}
+
+.health{background: green;
+}
+
+.weapon{background: yellow;}
+
+
+.enemy{background: red;}
+
+
+.boss{background: DarkRed;}
+
+
+.stairs{background: purple;}

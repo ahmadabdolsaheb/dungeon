@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import './App.css';
-var hidth = 5;
-//const levelPlus7 = 7
-var Levels = [
-  {player: 2},
-  {health: 3},
-  {stairs: 7},
-  {weapon: 4},
-  {enemy: 5},
-  {enemy: 5},
-  {health: 3},
-  {weapon: 4},
-  {health: 3},
-  {enemy: 5},
-  {boss: 6}
+var hidth = 30;
+const levelPlus6 = 6
+var pLocate = [];
+var levels = [
+  ['player', 2],
+  ['health', 3],
+  ['stairs', 7],
+  ['weapon', 4],
+  ['enemy', 5],
+  ['enemy', 5],
+  ['health', 3],
+  ['weapon', 4],
+  ['health', 3],
+  ['enemy', 5],
+  ['boss', 6]
 ];
 class App extends Component {
   constructor(props) {
@@ -25,23 +26,59 @@ class App extends Component {
       bossHealth: 500,
       weapon: "fist",
       level:1,
-      grid:this.randSetter()
+      grid:this.nextMove()
     };
   }
-  fullArray = () => {
-    var array = [];
-    for (var i = 0; i < hidth; i++) {
-      array.push([]);
-      for (var j = 0; j < hidth; j++) {
-        array[i].push(1);
-      }
-    }
-    return array;
+  componentDidMount () {
+  //this.centerScreen();
+  document.addEventListener('keydown', this.controllerPress.bind(this));
+  //document.addEventListener('keyup', this.controllerRelease.bind(this));
+  };
+  centerScreen = () => {
+          var tdWidth = document.getElementsByClassName('player').clientWidth,
+          tdHeight = document.getElementsByClassName('player').clientHeight,
+          top = window.innerHeight/2 - (pLocate*tdHeight),
+          left = window.innerWidth/2 - (pLocate*tdWidth);
+          console.log(document.getElementsByClassName("player").clientWidth);
+
+      //document.getElementsByClassName('grid').style.top = top + 'px';
+      //document.getElementsByClassName('grid').style.left = left + 'px';
+  };
+  controllerPress = (e) => { //this is where all the game controls and actions are
+    var keyPressed = e.keyCode; //get what button was pushed
+    switch (keyPressed) {
+      case 37: case 65: /*left arrow or 'a' pressed*/
+        this.movePlayer([0, -1]);
+        break;
+      case 38: case 87: /*up arrow or 'w' pressed*/
+        this.movePlayer([-1, 0]);
+        break;
+      case 39: case 68: /*right arrow or 'd' pressed*/
+        this.movePlayer([0, 1]);
+        break;
+      case 40: case 83: /*down arrow or 's' pressed*/
+        this.movePlayer([1, 0]);
+        break;
+      default:
+        break;
+    } //end switch
+  } //end controllerPress()
+  movePlayer = (move) => {// move the player according to the current
+  if(this.state.grid[pLocate[0] + move[0]][pLocate[1] + move[1]] === 0){
+    var oldGrid = this.state.grid;
+    oldGrid[pLocate[0]][pLocate[1]] = 0;
+    oldGrid[pLocate[0] + move[0]][pLocate[1] + move[1]] = 2;
+    pLocate = [Number([pLocate[0] + move[0]]),Number([pLocate[1] + move[1]])];
+    this.setState ({
+      grid: oldGrid
+    });
+    this.centerScreen();
   }
+ };
   nextMove = () => {
     var openArr = [];
-    var maxTurn = 10; // the number of turns the tunnel has
-    var maxLength = 6; // maximum number of each turn can have
+    var maxTurn = 30; // the number of turns the tunnel has
+    var maxLength = 10; // maximum number of each turn can have
     var fulArr = this.fullArray(); // save a full array;
     var curRow = Math.floor(Math.random() * hidth);// pick a random row
     var curCol = Math.floor(Math.random() * hidth);// pick a random column
@@ -74,30 +111,54 @@ class App extends Component {
       lastTurn = randTurn;//set last turn to the value of the current turn
       maxTurn--;// decrement the number of turns allowed
     }
-    console.log( fulArr);
-    console.log(this.uniqBy(openArr, JSON.stringify));
+    // find unique open spots and assign a charcter based on the levels array and the specified level
+    var uniq = this.uniqBy(openArr, JSON.stringify);
+    for (var i = 0; i < levelPlus6; i++){
+      var randNum = Math.floor(Math.random() * uniq.length);
+      var randItem = uniq[randNum];
+      fulArr[randItem[0]][randItem[1]] = levels[i][1];
+      uniq.splice(randNum, 1);
+      if (levels[i][1] === 2){
+        pLocate = [randItem[0],randItem[1]];
+      }
+    }
+    //console.log("levels " + levels[0][0]);
+    //console.log(this.uniqBy(openArr, JSON.stringify));
     return fulArr;// finally retun the array to be drawn
-
   }
-  uniqBy = (a, key) => {
+
+
+  fullArray = () => {// makes an array filled with 1
+    var array = [];
+    for (var i = 0; i < hidth; i++) {
+      array.push([]);
+      for (var j = 0; j < hidth; j++) {
+        array[i].push(1);
+      }
+    }
+    return array;
+  }
+  uniqBy = (a, key) => {// returns a unique array
      var seen = {};
      return a.filter(function(item) {
        var k = key(item);
        return seen.hasOwnProperty(k) ? false : (seen[k] = true);
      })
    }
-  randSetter = (levels, level) => {
-    return this.nextMove();
-  }
   render() {
-
     return (
       <div>
   <table className="grid">
     {this.state.grid.map((obj, row) =>
         <tr className="">
             {obj.map((obj2, col) =>
-                <td className={obj2 ? 'wall' : ''} key={Number(""+ row + col)}>{obj2}</td>
+              <td className={obj2 === 1 ? 'wall' :
+                            (obj2 === 2 ? 'player' :
+                            (obj2 === 3 ? 'health' :
+                            (obj2 === 4 ? 'weapon' :
+                            (obj2 === 5 ? 'enemy' :
+                            (obj2 === 6 ? 'boss' :
+                            (obj2 === 7 ? 'stairs' : ""))))))} key={Number(""+ row + col)}></td>
         )}</tr>
     )}
   </table>
