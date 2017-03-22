@@ -1,24 +1,30 @@
-.App {
+
+
+html{
+  font-family: 'Open Sans Condensed', sans-serif;
+  background: #333;
+  font-size: .7em;
+}
+
+
+.grid{
+    margin: 2em auto;
+}
+
+
+td
+{
+  width: 15px ;
+  height: 15px;
   text-align: center;
+  background: #636363;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.wall:before{
+    content: "";
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
 
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.wall{
+    background: #333;
 }

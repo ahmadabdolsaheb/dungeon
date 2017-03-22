@@ -1,26 +1,46 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-var hidth = 10;
+var hidth = 5;
+//const levelPlus7 = 7
+var Levels = [
+  {player: 2},
+  {health: 3},
+  {stairs: 7},
+  {weapon: 4},
+  {enemy: 5},
+  {enemy: 5},
+  {health: 3},
+  {weapon: 4},
+  {health: 3},
+  {enemy: 5},
+  {boss: 6}
+];
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       playing: true,
-      grid:1 //this.nextMove()
+      health: 100,
+      enemHealth: 50,
+      bossHealth: 500,
+      weapon: "fist",
+      level:1,
+      grid:this.randSetter()
     };
   }
   fullArray = () => {
     var array = [];
     for (var i = 0; i < hidth; i++) {
-      array.push(new Array);
+      array.push([]);
       for (var j = 0; j < hidth; j++) {
         array[i].push(1);
       }
     }
+    return array;
   }
   nextMove = () => {
-    var maxTurn = 30; // the number of turns the tunnel has
+    var openArr = [];
+    var maxTurn = 10; // the number of turns the tunnel has
     var maxLength = 6; // maximum number of each turn can have
     var fulArr = this.fullArray(); // save a full array;
     var curRow = Math.floor(Math.random() * hidth);// pick a random row
@@ -38,6 +58,7 @@ class App extends Component {
       var leng = Math.ceil(Math.random() * maxLength);//randomly choose a length form the maximum allowed length
       for (var i = 0; i < leng; i++) {//loop over the length
           fulArr[curRow][curCol] = 0;//set the value of the item to 0
+          openArr.push([curRow, curCol]);//save this open location
         //break the loop if it is going out of the map
           if(curRow === 0 && randTurn[0] === -1 ||
              curCol === 0 && randTurn[1] === -1 ||
@@ -47,25 +68,40 @@ class App extends Component {
           }else{
          //otherwise incriment the row and col according to the turn
             curRow += randTurn[0];
-            curCol += curCol + randTurn[1];
+            curCol += randTurn[1];
           }
       }
       lastTurn = randTurn;//set last turn to the value of the current turn
       maxTurn--;// decrement the number of turns allowed
     }
+    console.log( fulArr);
+    console.log(this.uniqBy(openArr, JSON.stringify));
     return fulArr;// finally retun the array to be drawn
+
+  }
+  uniqBy = (a, key) => {
+     var seen = {};
+     return a.filter(function(item) {
+       var k = key(item);
+       return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+     })
+   }
+  randSetter = (levels, level) => {
+    return this.nextMove();
   }
   render() {
+
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>RUNNING</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+      <div>
+  <table className="grid">
+    {this.state.grid.map((obj, row) =>
+        <tr className="">
+            {obj.map((obj2, col) =>
+                <td className={obj2 ? 'wall' : ''} key={Number(""+ row + col)}>{obj2}</td>
+        )}</tr>
+    )}
+  </table>
+</div>
     );
   }
 }
