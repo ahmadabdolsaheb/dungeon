@@ -4,18 +4,23 @@ html{
   font-family: 'Open Sans Condensed', sans-serif;
   background: #333;
   font-size: .7em;
+  color: white;
+}
+#scoreboard{
+  z-index: 100;
 }
 
-
-.grid{
+#grid {
     margin: 2em auto;
-}
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-collapse: collapse; }
 
 td
 {
-  width: 15px ;
-  height: 15px;
+  width: 1em ;
+  height: 1em;
   text-align: center;
   background: #636363;
 }

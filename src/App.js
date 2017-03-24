@@ -1,3 +1,7 @@
+//larg
+//tonum
+//make the levels a function that accepts a state
+//problem with binding thins
 import React, { Component } from 'react';
 import './App.css';
 var hidth = 30;
@@ -24,25 +28,25 @@ class App extends Component {
       health: 100,
       enemHealth: 50,
       bossHealth: 500,
-      weapon: "fist",
+      xp: 0,
+      weapon: 1,
       level:1,
-      grid:this.nextMove()
+      grid:this.mapGen()
     };
   }
   componentDidMount () {
-  //this.centerScreen();
+  this.centerScreen();
   document.addEventListener('keydown', this.controllerPress.bind(this));
   //document.addEventListener('keyup', this.controllerRelease.bind(this));
   };
   centerScreen = () => {
-          var tdWidth = document.getElementsByClassName('player').clientWidth,
-          tdHeight = document.getElementsByClassName('player').clientHeight,
-          top = window.innerHeight/2 - (pLocate*tdHeight),
-          left = window.innerWidth/2 - (pLocate*tdWidth);
-          console.log(document.getElementsByClassName("player").clientWidth);
+          var tdWidth = document.getElementById('player').clientWidth,
+          tdHeight = document.getElementById('player').clientHeight,
+          top = window.innerHeight/2 - (pLocate[0]*tdHeight),
+          left = window.innerWidth/2 - (pLocate[1]*tdWidth);
 
-      //document.getElementsByClassName('grid').style.top = top + 'px';
-      //document.getElementsByClassName('grid').style.left = left + 'px';
+      document.getElementById('grid').style.top = top + 'px';
+      document.getElementById('grid').style.left = left + 'px';
   };
   controllerPress = (e) => { //this is where all the game controls and actions are
     var keyPressed = e.keyCode; //get what button was pushed
@@ -72,12 +76,34 @@ class App extends Component {
     this.setState ({
       grid: oldGrid
     });
-    this.centerScreen();
+  }else if (this.state.grid[pLocate[0] + move[0]][pLocate[1] + move[1]] === 3) {
+    var oldGrid = this.state.grid;
+    oldGrid[pLocate[0]][pLocate[1]] = 0;
+    oldGrid[pLocate[0] + move[0]][pLocate[1] + move[1]] = 2;
+    pLocate = [Number([pLocate[0] + move[0]]),Number([pLocate[1] + move[1]])];
+    this.setState ({
+      health: this.state.health + 100,
+      grid: oldGrid
+    });
+  }else if (this.state.grid[pLocate[0] + move[0]][pLocate[1] + move[1]] === 4) {
+    var oldGrid = this.state.grid;
+    oldGrid[pLocate[0]][pLocate[1]] = 0;
+    oldGrid[pLocate[0] + move[0]][pLocate[1] + move[1]] = 2;
+    pLocate = [Number([pLocate[0] + move[0]]),Number([pLocate[1] + move[1]])];
+    this.setState ({
+      weapon: this.state.weapon+ 1,
+      grid: oldGrid
+    });
+  }else if (this.state.grid[pLocate[0] + move[0]][pLocate[1] + move[1]] === 7) {
+    this.setState ({
+      grid: this.mapGen()
+    });
   }
+  this.centerScreen();
  };
-  nextMove = () => {
+  mapGen = () => {
     var openArr = [];
-    var maxTurn = 30; // the number of turns the tunnel has
+    var maxTurn = 300; // the number of turns the tunnel has
     var maxLength = 10; // maximum number of each turn can have
     var fulArr = this.fullArray(); // save a full array;
     var curRow = Math.floor(Math.random() * hidth);// pick a random row
@@ -122,6 +148,7 @@ class App extends Component {
         pLocate = [randItem[0],randItem[1]];
       }
     }
+    //console.log(this.state.level);
     //console.log("levels " + levels[0][0]);
     //console.log(this.uniqBy(openArr, JSON.stringify));
     return fulArr;// finally retun the array to be drawn
@@ -145,24 +172,45 @@ class App extends Component {
        return seen.hasOwnProperty(k) ? false : (seen[k] = true);
      })
    }
+  levels = (a, key) => {// returns a unique array
+      return [
+        ['player', 2],
+        ['health', 3],
+        ['stairs', 7],
+        ['weapon', 4],
+        ['enemy', 5],
+        ['enemy', 5],
+        ['health', 3],
+        ['weapon', 4],
+        ['health', 3],
+        ['enemy', 5],
+        ['boss', 6]
+      ];
+    }
   render() {
     return (
       <div>
-  <table className="grid">
-    {this.state.grid.map((obj, row) =>
-        <tr className="">
-            {obj.map((obj2, col) =>
-              <td className={obj2 === 1 ? 'wall' :
-                            (obj2 === 2 ? 'player' :
-                            (obj2 === 3 ? 'health' :
-                            (obj2 === 4 ? 'weapon' :
-                            (obj2 === 5 ? 'enemy' :
-                            (obj2 === 6 ? 'boss' :
-                            (obj2 === 7 ? 'stairs' : ""))))))} key={Number(""+ row + col)}></td>
-        )}</tr>
-    )}
-  </table>
-</div>
+        <table className="grid" id="grid">
+          {this.state.grid.map((obj, row) =>
+              <tr className="">
+                  {obj.map((obj2, col) =>
+                    <td
+                    id={obj2 === 2 ? 'player' : ""+ row + col}
+                    className={obj2 === 1 ? 'wall' :
+                                  (obj2 === 2 ? 'player' :
+                                  (obj2 === 3 ? 'health' :
+                                  (obj2 === 4 ? 'weapon' :
+                                  (obj2 === 5 ? 'enemy' :
+                                  (obj2 === 6 ? 'boss' :
+                                  (obj2 === 7 ? 'stairs' : ""))))))} key={""+ row + col}></td>
+              )}</tr>
+          )}
+        </table>
+
+        <div id="scoreboard">
+        <h1>health: {this.state.health} level: {this.state.level} weapon: {this.state.weapon}</h1>
+        </div>
+      </div>
     );
   }
 }
