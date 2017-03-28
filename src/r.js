@@ -2,24 +2,24 @@
 //tonum
 //make the levels a function that accepts a state
 //problem with binding thins
-
 import React, { Component } from 'react';
 import './App.css';
 var hidth = 30;
 const levelPlus6 = 6
+var pLocate = [];
 var levels = [];
 var items = [
-  ['player', 2,1000,1000],
+  ['player', 2,0,0],
   ['health', 3],
   ['stairs', 7],
   ['weapon', 4],
-  ['enemy', 5,1000,1000,100],
-  ['enemy', 5,1000,1000,100],
+  ['enemy', 5,0,0,100],
+  ['enemy', 5,100],
   ['health', 3],
   ['weapon', 4],
   ['health', 3],
-  ['enemy', 5,1000,1000,100],
-  ['boss', 6,0,0,1000]
+  ['enemy', 5,0,0,100],
+  ['boss', 6,0,0,100]
 ];
 class App extends Component {
   constructor(props) {
@@ -32,7 +32,6 @@ class App extends Component {
       xp: 0,
       weapon: 1,
       level:1,
-      message:"you are playing",
       grid:this.mapGen()
     };
     this.levels = this.levels.bind(this);
@@ -101,20 +100,20 @@ class App extends Component {
      levels = items;
     // find unique open spots and assign a charcter based on the levels array and the specified level
     var uniq = this.uniqBy(openArr, JSON.stringify);
-    for (var j = 0; j < levelPlus6; j++){
+    for (var i = 0; i < levelPlus6; i++){
       var randNum = Math.floor(Math.random() * uniq.length);
       var randItem = uniq[randNum];
-      fulArr[randItem[0]][randItem[1]] = levels[j][1];
+      fulArr[randItem[0]][randItem[1]] = levels[i][1];
       uniq.splice(randNum, 1);
-      if (levels[j][1] === 2){
-        //pLocate = [randItem[0],randItem[1]];
-        levels[j][2] = randItem[0];
-        levels[j][3] = randItem[1];
+      if (levels[i][1] === 2){
+        pLocate = [randItem[0],randItem[1]];
+        levels[i][2] = randItem[0];
+        levels[i][3] = randItem[1];
       }
-      if (levels[j][1] === 4 || levels[j][1] === 5){
+      if (levels[i][1] === 4 || levels[i][1] === 5){
         //pLocate = [randItem[0],randItem[1]];
-        levels[j][2] = randItem[0];
-        levels[j][3] = randItem[1];
+        levels[i].push(randItem[0]);
+        levels[i].push(randItem[1]);
       }
     }
     console.log(levels);
@@ -123,15 +122,18 @@ class App extends Component {
     //console.log(this.uniqBy(openArr, JSON.stringify));
     return fulArr;// finally retun the array to be drawn
   }
+  damage = (level) => {
 
+  }
   centerScreen = () => {
           var tdWidth = document.getElementById('player').clientWidth,
           tdHeight = document.getElementById('player').clientHeight,
-          top = window.innerHeight/2 - (levels[0][2]*tdHeight),
-          left = window.innerWidth/2 - (levels[0][3]*tdWidth);
+          top = window.innerHeight/2 - (pLocate[0]*tdHeight),
+          left = window.innerWidth/2 - (pLocate[1]*tdWidth);
 
       document.getElementById('grid').style.top = top + 'px';
       document.getElementById('grid').style.left = left + 'px';
+      console.log("center");
   };
   controllerPress = (e) => { //this is where all the game controls and actions are
     var keyPressed = e.keyCode; //get what button was pushed
@@ -153,143 +155,46 @@ class App extends Component {
     } //end switch
   } //end controllerPress()
   reTile = (move, oldGrid) => {
-    oldGrid[levels[0][2]][levels[0][3]] = 0;
-    oldGrid[levels[0][2] + move[0]][levels[0][3] + move[1]] = 2;
-    levels[0][2] +=  move[0];
-    levels[0][3] +=  move[1];
+    oldGrid[items[0][2]][items[0][3]] = 0;
+    oldGrid[items[0][2] + move[0]][items[0][3] + move[1]] = 2;
+    items[0][2] = items[0][2] + move[0];
+    items[0][3] = items[0][3] + move[1];
   }
   movePlayer = (move) => {// move the player according to the current
-  var oldGrid;
-  if(this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 0){
-    oldGrid = this.state.grid;
+  if(this.state.grid[items[0][2] + move[0]][items[0][3] + move[1]] === 0){
+    var oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       grid: oldGrid
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 3) {
-    oldGrid = this.state.grid;
+  }else if (this.state.grid[items[0][2] + move[0]][items[0][3] + move[1]] === 3) {
+    var oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       health: this.state.health + 100,
       grid: oldGrid
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 4) {
-    oldGrid = this.state.grid;
+  }else if (this.state.grid[items[0][2] + move[0]][items[0][3] + move[1]] === 4) {
+    var oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       weapon: this.state.weapon+ 1,
       grid: oldGrid
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 7) {
+  }else if (this.state.grid[items[0][2] + move[0]][items[0][3] + move[1]] === 7) {
     this.setState ({
       grid: this.mapGen()
     });
   }
-  else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 5) {
-    var playerDamage =  30 * (1 + this.state.weapon / 3)+Math.floor(Math.random() * 4);
-    var enemyDamage = 30 * this.state.level+Math.floor(Math.random() * 4);
-    var targetEnem = 1000;
-    levels.map((arr, j) => {
-     if(arr[0] === "enemy" &&
-         arr[2] === levels[0][2] + move[0] &&
-         arr[3] === levels[0][3] + move[1]){
-         targetEnem = j;
-      }
+  else if (this.state.grid[items[0][2] + move[0]][items[0][3] + move[1]] === 5) {
+    this.setState ({
+      health: this.state.health - 3
     });
-    if(this.state.health <= enemyDamage){
-      console.log("dying");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        message: "you are dead"
-      });
-    }else if(levels[targetEnem][4] > playerDamage){
-      console.log("fighting");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      levels[targetEnem][4] -= playerDamage;
-      this.setState ({
-        health: this.state.health - enemyDamage
-      });
-    }else if(levels[targetEnem][4] <= playerDamage){
-      console.log("enemy kill");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      levels[targetEnem][4] = 0;
-      oldGrid = this.state.grid;
-      this.reTile(move, oldGrid);
-      var curLevel = this.state.level;
-      if(this.state.xp % 5 === 0 && levelPlus6 < 11){
-        console.log(this.state.xp);
-        console.log(levelPlus6);
-        console.log(this.state.xp % 5);
-        console.log(levelPlus6 < 11);
-        console.log("yay");
-        curLevel = this.state.level + 1;
-        levelPlus6++;
-      }
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        xp: this.state.xp + 1,
-        grid: oldGrid,
-        level: curLevel
-      });
-    }
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 6) {
-    var playerDamage =  30 * (1 + this.state.weapon / 3)+Math.floor(Math.random() * 4);
-    var enemyDamage = 30 * this.state.level * 1.2 + Math.floor(Math.random() * 4);
-    var targetEnem = 10;
-    if(this.state.health <= enemyDamage){
-      console.log("dying");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        message: "you are dead"
-      });
-    }else if(levels[targetEnem][4] > playerDamage){
-      console.log("fighting");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      levels[targetEnem][4] -= playerDamage;
-      this.setState ({
-        health: this.state.health - enemyDamage
-      });
-    }else if(levels[targetEnem][4] <= playerDamage){
-      console.log("enemy kill");
-      console.log("enemy health: " + levels[targetEnem][4]);
-      console.log("player Damag: " + playerDamage);
-      console.log("player healt: " + this.state.health);
-      console.log("enemy damage: " + enemyDamage);
-      levels[targetEnem][4] = 0;
-      oldGrid = this.state.grid;
-      this.reTile(move, oldGrid);
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        xp: this.state.xp + 1,
-        grid: oldGrid,
-        message: "YOU WIN!"
-      });
-    }
-
   }
   this.centerScreen();
  };
 
- damage = (levelorweapon) => {
-   return 30*levelorweapon+Math.floor(Math.random() * 4);
- }
+
 
   fullArray = () => {// makes an array filled with 1
     var array = [];
@@ -308,12 +213,13 @@ class App extends Component {
        return seen.hasOwnProperty(k) ? false : (seen[k] = true);
      })
    }
+
   render() {
     return (
       <div>
         <table className="grid" id="grid">
           {this.state.grid.map((obj, row) =>
-              <tr className="" key={row}>
+              <tr className="">
                   {obj.map((obj2, col) =>
                     <td
                     id={obj2 === 2 ? 'player' : ""+ row + col}
@@ -323,15 +229,13 @@ class App extends Component {
                                   (obj2 === 4 ? 'weapon' :
                                   (obj2 === 5 ? 'enemy' :
                                   (obj2 === 6 ? 'boss' :
-                                  (obj2 === 7 ? 'stairs' : ""))))))} key={col}></td>
+                                  (obj2 === 7 ? 'stairs' : ""))))))} key={""+ row + col}></td>
               )}</tr>
           )}
         </table>
 
-
         <div id="scoreboard">
         <h1>health: {this.state.health} XP: {this.state.xp} level: {this.state.level} weapon: {this.state.weapon}</h1>
-        <h1>{this.state.message}</h1>
         </div>
       </div>
     );
