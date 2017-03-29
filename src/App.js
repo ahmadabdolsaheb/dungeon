@@ -61,10 +61,24 @@ class App extends Component {
       ['boss', 6, 1000]
     ];
   }
+  restart = () => {
+    levelPlus6 = 6;
+    this.setState ({
+      playing: true,
+      health: 100,
+      enemHealth: 50,
+      bossHealth: 500,
+      xp: 0,
+      weapon: 1,
+      level:1,
+      message:"you are playing",
+      grid:this.mapGen()
+    });
+  }
   mapGen = () => {
     var openArr = [];
     var maxTurn = 300; // the number of turns the tunnel has
-    var maxLength = 10; // maximum number of each turn can have
+    var maxLength = 5; // maximum number of each turn can have
     var fulArr = this.fullArray(); // save a full array;
     var curRow = Math.floor(Math.random() * hidth);// pick a random row
     var curCol = Math.floor(Math.random() * hidth);// pick a random column
@@ -164,25 +178,29 @@ class App extends Component {
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
-      grid: oldGrid
+      grid: oldGrid,
+      message: ""
     });
   }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 3) {
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       health: this.state.health + 100,
-      grid: oldGrid
+      grid: oldGrid,
+      message: ""
     });
   }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 4) {
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       weapon: this.state.weapon+ 1,
-      grid: oldGrid
+      grid: oldGrid,
+      message: ""
     });
   }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 7) {
     this.setState ({
-      grid: this.mapGen()
+      grid: this.mapGen(),
+      message: ""
     });
   }
   else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 5) {
@@ -202,10 +220,8 @@ class App extends Component {
       console.log("player Damag: " + playerDamage);
       console.log("player healt: " + this.state.health);
       console.log("enemy damage: " + enemyDamage);
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        message: "you are dead"
-      });
+      alert("not enough health to take another hit. you are technically dead. :( the game will restart");
+      this.restart();
     }else if(levels[targetEnem][4] > playerDamage){
       console.log("fighting");
       console.log("enemy health: " + levels[targetEnem][4]);
@@ -214,7 +230,8 @@ class App extends Component {
       console.log("enemy damage: " + enemyDamage);
       levels[targetEnem][4] -= playerDamage;
       this.setState ({
-        health: this.state.health - enemyDamage
+        health: this.state.health - enemyDamage,
+        message: "enemy health:" + levels[targetEnem][4] + ", enemy hit power: " + enemyDamage
       });
     }else if(levels[targetEnem][4] <= playerDamage){
       console.log("enemy kill");
@@ -231,7 +248,6 @@ class App extends Component {
         console.log(levelPlus6);
         console.log(this.state.xp % 5);
         console.log(levelPlus6 < 11);
-        console.log("yay");
         curLevel = this.state.level + 1;
         levelPlus6++;
       }
@@ -239,7 +255,8 @@ class App extends Component {
         health: this.state.health - enemyDamage,
         xp: this.state.xp + 1,
         grid: oldGrid,
-        level: curLevel
+        level: curLevel,
+        message: "Enemy Destroyed!"
       });
     }
   }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 6) {
@@ -252,10 +269,8 @@ class App extends Component {
       console.log("player Damag: " + playerDamage);
       console.log("player healt: " + this.state.health);
       console.log("enemy damage: " + enemyDamage);
-      this.setState ({
-        health: this.state.health - enemyDamage,
-        message: "you are dead"
-      });
+      alert("not enough health to take another hit from the boss. You are technically dead. The game will restart :(");
+      this.restart();
     }else if(levels[targetEnem][4] > playerDamage){
       console.log("fighting");
       console.log("enemy health: " + levels[targetEnem][4]);
@@ -264,7 +279,8 @@ class App extends Component {
       console.log("enemy damage: " + enemyDamage);
       levels[targetEnem][4] -= playerDamage;
       this.setState ({
-        health: this.state.health - enemyDamage
+        health: this.state.health - enemyDamage,
+        message: "Boss health:" + levels[targetEnem][4] + ", Boss hit power: " + enemyDamage
       });
     }else if(levels[targetEnem][4] <= playerDamage){
       console.log("enemy kill");
@@ -281,6 +297,8 @@ class App extends Component {
         grid: oldGrid,
         message: "YOU WIN!"
       });
+      alert("YOU WIN");
+      this.restart();
     }
 
   }
@@ -330,8 +348,8 @@ class App extends Component {
 
 
         <div id="scoreboard">
-        <h1>health: {this.state.health} XP: {this.state.xp} level: {this.state.level} weapon: {this.state.weapon}</h1>
-        <h1>{this.state.message}</h1>
+          <h1>health: {this.state.health} XP: {this.state.xp} level: {this.state.level} weapon: {this.state.weapon}</h1>
+          <h1>{this.state.message}</h1>
         </div>
       </div>
     );
