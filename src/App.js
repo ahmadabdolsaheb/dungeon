@@ -1,48 +1,42 @@
-//larg
-//tonum
-//make the levels a function that accepts a state
-//problem with binding thins
 
 import React, { Component } from 'react';
 import './App.css';
 
-var levels = [];
+
+var levels = [];//a copy of the items on the board and their locations
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cursor : 6,
-      hidth : 30,
-      playing: true,
+      cursor : 6,//how far should the map loop through the items array
+      hidth : 30,// height and width
+      playing: true,//player/win/lose/playing state
       health: 50,
-      enemHealth: 50,
-      bossHealth: 500,
       xp: 0,
       weapon: 1,
       level:1,
       message:"Use the arrow keys to move around.",
-      center:[],
-      grid:[]
+      grid:[]// the main map diplayed on the screen
     };
-    //this.items = this.items.bind(this);
   }
   componentWillMount () {
     {
-      this.setState({grid:this.mapGen()})
+      this.setState({grid:this.mapGen()})// make a map based on the states and set it to grid
     }
   }
-  componentDidMount () {
+  componentDidMount () {//set the player to center and listen for keypress
   this.centerScreen();
   document.addEventListener('keydown', this.controllerPress.bind(this));
   }
-  componentDidUpdate() {
+  componentDidUpdate() {//listen for death or win
    this.centerScreen();
      if(this.state.playing === false){
        this.timer = setInterval(this.deathCheck, 50);
-     }
+     }else if(this.state.playing === "won")
+     {this.timer = setInterval(this.winCheck, 50);}
  }
- items = (level) =>{
+ items = (level) =>{// the main items array that the cursor will go through based on the level
    return [
      ['player', 2,1000,1000],
      ['health', 3],
@@ -93,10 +87,11 @@ class App extends Component {
      lastTurn = randTurn;//set last turn to the value of the current turn
      maxTurn--;// decrement the number of turns allowed
    }
-
+   // make an array of items and give enemies blood based on their level
     levels = this.items(this.state.level);
    // find unique open spots and assign a charcter based on the levels array and the specified level
    var uniq = this.uniqBy(openArr, JSON.stringify);
+   // loop through empty spots and allocate items
    for (var j = 0; j < this.state.cursor; j++){
      var randNum = Math.floor(Math.random() * uniq.length);
      var randItem = uniq[randNum];
@@ -114,20 +109,24 @@ class App extends Component {
 
    return fulArr;// finally retun the array to be drawn
  }
-  deathCheck = () => {
+  deathCheck = () => {// if dead
     alert("you are dead, would you like to restart?");
     this.restart();
     clearInterval(this.timer);
   }
-  restart = () => {
+  winCheck = () => {// if won
+    alert("you won, would you like to restart?");
+    this.restart();
+    clearInterval(this.timer);
+  }
+  restart = () => {//restart
     location.reload();
   }
-  centerScreen = () => {
-          var tdWidth = document.getElementById('player').clientWidth,
-          tdHeight = document.getElementById('player').clientHeight,
-          top = window.innerHeight/2 - (levels[0][2]*tdHeight),
-          left = window.innerWidth/2 - (levels[0][3]*tdWidth);
-
+  centerScreen = () => {// centerscreen based on player location
+      var tdWidth = document.getElementById('player').clientWidth,
+      tdHeight = document.getElementById('player').clientHeight,
+      top = window.innerHeight/2 - (levels[0][2]*tdHeight),
+      left = window.innerWidth/2 - (levels[0][3]*tdWidth);
       document.getElementById('grid').style.top = top + 'px';
       document.getElementById('grid').style.left = left + 'px';
   };
@@ -150,7 +149,7 @@ class App extends Component {
         break;
     } //end switch
   } //end controllerPress()
-  reTile = (move, oldGrid) => {
+  reTile = (move, oldGrid) => {//change the tiles after each move
     oldGrid[levels[0][2]][levels[0][3]] = 0;
     oldGrid[levels[0][2] + move[0]][levels[0][3] + move[1]] = 2;
     levels[0][2] +=  move[0];
@@ -158,14 +157,14 @@ class App extends Component {
   }
   movePlayer = (move) => {// move the player according to the current
   var oldGrid;
-  if(this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 0){
+  if(this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 0){//if empty spot
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
       grid: oldGrid,
       message: "collect items and fight enemies"
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 3) {
+  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 3) {//if health
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
@@ -173,7 +172,7 @@ class App extends Component {
       grid: oldGrid,
       message: "Health item collected."
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 4) {
+  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 4) {//if weapon
     oldGrid = this.state.grid;
     this.reTile(move, oldGrid);
     this.setState ({
@@ -181,24 +180,24 @@ class App extends Component {
       grid: oldGrid,
       message: "Weapon effectiveness upgraded."
     });
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 7) {
+  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 7) {// if teleport
     this.setState ({
       grid: this.mapGen(),
       message: "Teleported to another section of the dungeon."
     });
   }
-  else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 5) {
-    var playerDamage = Math.floor( 30 * (1 + this.state.weapon / 3)+Math.random() * 4);
-    var enemyDamage = Math.floor(30 * this.state.level+Math.random() * 4);
+  else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 5) {//enemy
+    var playerDamage = Math.floor( 30 * (1 + this.state.weapon / 3)+Math.random() * 4);//set player damage
+    var enemyDamage = Math.floor(30 * this.state.level+Math.random() * 4);//set enemy damage
     var targetEnem = 1000;
-    levels.map((arr, j) => {
+    levels.map((arr, j) => {// findout which enemy is being fought with
      if(arr[0] === "enemy" &&
          arr[2] === levels[0][2] + move[0] &&
          arr[3] === levels[0][3] + move[1]){
          targetEnem = j;
       }
     });
-    if(this.state.health <= enemyDamage){
+    if(this.state.health <= enemyDamage){//detect death
       console.log("dying");
       console.log("enemy health: " + levels[targetEnem][4]);
       console.log("player Damag: " + playerDamage);
@@ -210,7 +209,7 @@ class App extends Component {
         message: "YOU ARE DEAD !!!"
       });
 
-    }else if(levels[targetEnem][4] > playerDamage){
+    }else if(levels[targetEnem][4] > playerDamage){//detect fighting
       console.log("fighting");
       console.log("enemy health: " + levels[targetEnem][4]);
       console.log("player Damag: " + playerDamage);
@@ -221,7 +220,7 @@ class App extends Component {
         health: this.state.health - enemyDamage,
         message: "enemy health:" + levels[targetEnem][4] + ", enemy hit power: " + enemyDamage
       });
-    }else if(levels[targetEnem][4] <= playerDamage){
+    }else if(levels[targetEnem][4] <= playerDamage){//detect enemy kill
       console.log("enemy kill");
       console.log("enemy health: " + levels[targetEnem][4]);
       console.log("player Damag: " + playerDamage);
@@ -245,9 +244,9 @@ class App extends Component {
         message: "Enemy Destroyed!"
       });
     }
-  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 6) {
+  }else if (this.state.grid[levels[0][2] + move[0]][levels[0][3] + move[1]] === 6) {// detect boss and do the same as enemy
     var playerDamage = Math.floor( 30 * (1 + this.state.weapon / 3)+Math.random() * 4);
-    var enemyDamage = Math.floor(30 * this.state.level+Math.random() * 4);
+    var enemyDamage = Math.floor(100 * this.state.level+Math.random() * 4);
     var targetEnem = 10;
     if(this.state.health <= enemyDamage){
       console.log("dying");
@@ -255,8 +254,11 @@ class App extends Component {
       console.log("player Damag: " + playerDamage);
       console.log("player healt: " + this.state.health);
       console.log("enemy damage: " + enemyDamage);
-      alert("not enough health to take another hit from the boss. You are technically dead. The game will restart :(");
-      this.restart();
+      this.setState ({
+        playing: "won",
+        health: this.state.health - enemyDamage,
+        message: "YOU WIN !!!"
+      });
     }else if(levels[targetEnem][4] > playerDamage){
       console.log("fighting");
       console.log("enemy health: " + levels[targetEnem][4]);
@@ -290,10 +292,6 @@ class App extends Component {
   }
 
  };
-
- damage = (levelorweapon) => {
-   return 30*levelorweapon+Math.floor(Math.random() * 4);
- }
 
   fullArray = () => {// makes an array filled with 1
     var array = [];
