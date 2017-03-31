@@ -1,7 +1,7 @@
 
 
 html{
-  font-family: 'Open Sans Condensed', sans-serif;
+  font-family: 'VT323', monospace !important;
   background: #333;
   font-size: .7em;
   color: white;
@@ -9,41 +9,49 @@ html{
 #scoreboard{
   z-index: 1;
 }
-
+h1{
+  font-size: 4em;
+.cube{
+  height:5px;
+  width:5px;
+}
+}
 #grid {
   z-index: -10;
     margin: 2em auto;
     position: fixed;
     top: 0;
     left: 0;
-    border-collapse: collapse; }
-
+    border-collapse: collapse;
+    table-layout: fixed;
+}
 td
 {
-  width: 6em ;
-  height: 6em;
+  width: 60px;
+  height:60px;
   text-align: center;
   background: #636363;
 }
+h2{
+  float:left;
+  width:4%;
+  text-align: center;
 
-.wall:before{
-    content: "";
 }
 
-
-.wall{background: #333;
-}
+.wall{background: #333;}
 
 .player{background: white;
-}
+color:black;}
 
-.health{background: green;
-}
+.health{background: green;}
 
-.weapon{background: yellow;}
+.weapon{background: yellow;
+color:black;}
 
 
-.enemy{background: red;}
+.enemy{background: red;
+color:black;}
 
 
 .boss{background: DarkRed;}
